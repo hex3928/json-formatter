@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON formatter</title>
+
+    <style>
+        body {
+            margin: 2rem;
+        }
+
+        #input {
+            background-color: whitesmoke;
+            color: teal;
+            border: 1px solid gray;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-sizing: border-box;
+            width: 100%;
+            resize: none;
+        }
+
+        button {
+            background-color: darkblue;
+            color: aqua;
+            margin: 1rem;
+            border: 2px solid black;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        pre {
+            background-color: whitesmoke;
+            color: teal;
+            border: 1px solid gray;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .json-key {
+            color: #984447;
+        }
+
+        .json-val {
+            color: #6670a0;
+        }
+
+        .json-string {
+            color: #128f22;
+        }
+    </style>
+</head>
+
+<body>
+    <textarea id="input" cols="30" rows="10"></textarea>
+
+    <button onclick="prettify()">Pretty print</button>
+
+    <pre><code id="output">Awaiting input</code></pre>
+
+    <script>
+        const input = document.querySelector("#input")
+        const output = document.querySelector("#output")
+
+        const colorize = (json) => {
+
+            function replacer(match, p1, p2, p3, offset) {
+                let key = "<span class='json-key'>"
+                let val = "<span class='json-val'>"
+                let str = "<span class='json-string'>"
+                let r = p1 || ""
+                if (p2)
+                    r = r + key + p2.replace(/[": ]/g, "") + "</span>: "
+                if (p3)
+                    r = r + (p3[0] == "\"" ? str : val) + p3 + "</span>"
+                return r + (offset || "")
+            }
+
+            let line = /^( *)("[\w]+": )?("[^"]*"|[\w.+-]*)?([,[{])?$/mg
+            return JSON.stringify(json, null, 3)
+                .replace(/&/g, "&amp").replace(/\\"/g, "&quot")
+                .replace(/</g, "&lt").replace(/>/g, "&gt")
+                .replace(line, replacer)
+        }
+
+        function prettify() {
+            try {
+                const parsed = JSON.parse(input.value)
+                const prettified = colorize(parsed)
+                output.innerHTML = prettified
+                input.style.borderColor = "gray"
+            } catch (err) {
+                input.style.borderColor = "tomato"
+            }
+        }
+    </script>
+</body>
+
+</html>
